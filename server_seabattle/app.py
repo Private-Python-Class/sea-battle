@@ -38,11 +38,30 @@ def status_formatter(board_data):
     return sublists
 
 
+def save_to_database(msg):
+    with open("./msg.txt", "a") as file:
+        file.writelines([f"{msg}\n"])
+
+def read_from_database():
+    with open("./msg.txt", "r") as file:
+        return file.readlines()
+
 @app.get("/interface")
 def interface(request: Request):
     data = status_formatter(example_map["map"])
     return templates.TemplateResponse("map.html", {"request": request, "game_board": data})
 
+
+@app.get("/example")
+def example():
+    msgs = read_from_database()
+    return {"msgs": msgs}
+
+@app.post("/post")
+def post(data: dict):
+    new_line = data["msg"]
+    save_to_database(new_line)
+    return {"status": "saved"}
 
 @app.get("/map")
 def map(*args):
