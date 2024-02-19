@@ -1,137 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Морской бой</title>
-<style>
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(10, 50px);
-        grid-template-rows: repeat(10, 50px);
-        gap: 1px;
-    }
-    .grid-item {
-        width: 50px;
-        height: 50px;
-        background-color: lightblue;
-        border: 1px solid black;
-        text-align: center;
-        line-height: 50px;
-    }
-</style>
-</head>
-<body>
-<h1>Морской бой</h1>
-<h2>Мои корабли</h2>
-<div class="grid-container" id="my-grid"></div>
-<h2>Корабли соперника</h2>
-<div class="grid-container" id="enemy-grid"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game</title>
+    <script>
+        function submitForm() {
+            var playerName = document.getElementById('player_name').value;
+            var cell = document.getElementById('cell').value;
+            var formData = {
+                "player_name": playerName,
+                "cell": cell
+            };
 
-<script>
-    const playerGrid = document.getElementById('my-grid');
-    const computerGrid = document.getElementById('enemy-grid');
-    const gridSize = 10;
-
-    // Состояния клеток
-    const EMPTY_CELL = '⬜';
-    const SHIP_CELL = '⛴️';
-    const HIT_CELL = '💥';
-    const MISS_CELL = '❌';
-
-    // Функция создания сетки
-    function createGrid(container, clickHandler) {
-        for (let i = 0; i < gridSize; i++) {
-            for (let j = 0; j < gridSize; j++) {
-                const gridItem = document.createElement('div');
-                gridItem.classList.add('grid-item');
-                gridItem.dataset.row = i;
-                gridItem.dataset.col = j;
-                gridItem.addEventListener('click', clickHandler);
-                container.appendChild(gridItem);
-            }
-        }
-    }
-
-    // Функция обновления состояния ячейки
-    function updateCellState(gridItem, state) {
-        switch (state) {
-            case 'empty':
-                gridItem.textContent = EMPTY_CELL;
-                break;
-            case 'ship':
-                gridItem.textContent = SHIP_CELL;
-                break;
-            case 'hit':
-                gridItem.textContent = HIT_CELL;
-                break;
-            case 'miss':
-                gridItem.textContent = MISS_CELL;
-                break;
-            default:
-                gridItem.textContent = ''; // По умолчанию пустая ячейка
-        }
-    }
-
-    // Обработчик клика по ячейке
-    function cellClickHandler(event) {
-        const row = event.target.dataset.row;
-        const col = event.target.dataset.col;
-        console.log(`Clicked on cell (${row}, ${col})`);
-        const playerId = 'player'; // Здесь нужно использовать идентификатор игрока
-        sendTurn(playerId, row, col);
-    }
-
-    // Получение данных о положении кораблей с сервера
-    function fetchMap(playerId) {
-        fetch(`/map?playerId=${playerId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Обработка данных о положении кораблей
-                console.log(data);
-                // Пример обновления состояния ячеек на основе данных с сервера
-                data.forEach(cell => {
-                    const row = cell.row;
-                    const col = cell.col;
-                    const state = cell.state;
-                    const grid = playerId === 'player' ? playerGrid : computerGrid;
-                    const gridItem = grid.querySelector(`[data-row='${row}'][data-col='${col}']`);
-                    updateCellState(gridItem, state);
-                });
+            fetch('/turn', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => {
+                // Обработка ответа сервера
+                console.log(response);
             })
             .catch(error => {
-                console.error('Error fetching map:', error);
+                console.error('Error:', error);
             });
-    }
+        }
+    </script>
+</head>
+<body>
+    <h1>Battleship Game</h1>
 
-    // Отправка данных об изменении состояния клетки на сервер
-    function sendTurn(playerId, row, col) {
-        fetch('/turn', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                playerId: playerId,
-                row: row,
-                col: col
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Обработка ответа сервера (если нужно)
-            console.log(data);
-        })
-        .catch(error => {
-            console.error('Error sending turn:', error);
-        });
-    }
+    <form>
+        <label for="player_name">Player Name:</label>
+        <input type="text" id="player_name" name="player_name"><br><br>
 
-    // Создание сеток
-    createGrid(playerGrid, cellClickHandler);
-    createGrid(computerGrid, () => {});
-    fetchMap('player');
-    fetchMap('computer');
-</script>
+        <label for="cell">Cell:</label>
+        <input type="text" id="cell" name="cell"><br><br>
+
+        <input type="button" value="Submit" onclick="submitForm()">
+    </form>
+
+    <table border="1">
+      {% for row in game_board %}
+      <tr>
+        {% for cell in row %}
+        <td>{{ cell.status }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
 </body>
 </html>

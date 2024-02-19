@@ -54,7 +54,6 @@ class Field(object):
         return self._field
 
     def generate_field(self):
-
         f = {}
         for l in self.letters:
             for d in self.digits:
@@ -62,7 +61,7 @@ class Field(object):
 
         return f
 
-    def set_ship(self, ship: object, coords: str, vector: str): # here!
+    def set_ship(self, ship: object, coords: str, vector: str):  # here!
         # написать логику где относительно направлеия пробегаемся по клеткам и вставляем ссылку на корабль
         pass
 
@@ -115,6 +114,7 @@ class Player(object):
 
     def generate_ships(self):
         """я забыл что она делает xD"""
+        pass
 
     def ship_set(self, ship, start_coor, vector):  # like chipset.
         """Fuction used for player to set ships on field."""
@@ -128,7 +128,6 @@ class Interface(object):
 
     def set_ship_on_the_field(self, ship, vector):
         self.field.set_ship(ship)
-
 
     def mark_attacked(self):
         pass
@@ -144,5 +143,3 @@ class Interface(object):
 
     def render_field(self):
         pass
-
-
